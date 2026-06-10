@@ -1,5 +1,6 @@
 from sys import argv
 
+
 class Zone:
 
     def __init__(self, name: str, x: int, y: int, 
@@ -20,85 +21,75 @@ class Connection:
                  max_link_capacity: int = 1):
         self.zone1 = zone1
         self.zone2 = zone2
-        self.max_link_capacity = max_link_capacity 
+        self.max_link_capacity = max_link_capacity
 
 
 class Parser:
 
     def __init__(self):
-        map_file = argv[1]
+        zones_file = argv[1]
+        self.nb_drones = 0
         self.start_hub = {}
-        self.map = {}
-        self.read_map(map_file)
+        self.zones = {}
+        self.connections = {}
+        self.read_zones(zones_file)
 
-    def read_map(self, map_file: str):
-        with open(map_file, "r") as file:
+    def read_zones(self, zones_file: str):
+        with open(zones_file, "r") as file:
             for line in file:
 
                 if line.startswith('#'):
                     continue
 
-                if line.startswith(("start_hub", "end_hub", "hub")):
-                    attributes = line.split()
-                    metadati = {}
-                    if len(attributes) > 4:
-                        metadati = self.metadati_extractor(
-                                                    metadati, attributes)
+                line = line.strip()
 
-                    zone = Zone(attributes[1],
-                                int(attributes[2]), int(attributes[3]),
-                                metadati.get("zone_type", "normal"),
-                                metadati.get("max_drones", 1),
+                if line.startswith(("nb_drones")):
+                    elements = line.split()
+                    self.nb_drones = int(elements[1])
+
+                if line.startswith(("start_hub", "end_hub", "hub")):
+                    elements = line.split()
+                    metadati = {}
+                    if len(elements) > 4:
+                        metadati = self.metadati_extractor(
+                                                    metadati, elements[4:])
+
+                    zone = Zone(elements[1],
+                                int(elements[2]), int(elements[3]),
+                                metadati.get("zone", "normal"),
+                                int(metadati.get("max_drones", 1)),
                                 metadati.get("color", None)
-                                     )
-                    if attributes[0] == "start_hub:":
+                                )
+                    if elements[0] == "start_hub:":
                         self.start_hub = zone
-                    elif attributes[0] == "end_hub:":
+                    elif elements[0] == "end_hub:":
                         self.end_hub = zone
 
-                    self.map[attributes[1]] = zone
+                    self.zones[elements[1]] = zone
 
                 elif line.startswith('connection'):
-                    attributes = line.split(" ")
-                    splitted_zones = line.split("-")
+                    elements = line.split(" ")
+                    first_zone, second_zone = elements[1].split("-")
                     metadati = {}
-                    if len(attributes) > 4:
+                    if len(elements) >= 3:
                         metadati = self.metadati_extractor(
-                                                    metadati, attributes)
-                    connection = Connection(splitted_zones[0],
-                                            splitted_zones[1],
-                                            metadati.get("max_link_capacity",
-                                                         1))
+                                                    metadati, elements[2:])
+                    connection = Connection(first_zone,
+                                            second_zone,
+                                            int(metadati.get(
+                                                "max_link_capacity", 1)))
 
-                    self.map[attributes[1]] = connection
+                    self.connections[elements[1]] = connection
 
-
-
-
-    def metadati_extractor(self, metadati: dict, attributes: list[str]) -> dict:
-
-        stripped_attr = attributes[4].strip("[]")
+    def metadati_extractor(self, metadati: dict, elements: list[str]) -> dict:
+        elements = " ".join(elements)
+        stripped_attr = elements.strip("[]")
         splitted_attr = stripped_attr.split(" ")
 
         for element in splitted_attr:
+            if element == "":
+                continue
             key, value = element.split("=")
             metadati[key] = value
 
         return metadati
-
-
-# b_drones: 5
-#
-# start_hub: hub 0 0 [color=green]
-# end_hub: goal 10 10 [color=yellow]
-# hub: roof1 3 4 [zone=restricted color=red]
-# hub: roof2 6 2 [zone=normal color=blue]
-# hub: corridorA 4 3 [zone=priority color=green max_drones=2]
-# hub: tunnelB 7 4 [zone=normal color=red]
-# hub: obstacleX 5 5 [zone=blocked color=gray]
-# connection: hub-roof1
-# connection: hub-corridorA
-# connection: roof1-roof2
-# connection: roof2-goal
-# connection: corridorA-tunnelB [max_link_capacity=2]
-# connection: tunnelB-go
