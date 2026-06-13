@@ -1,4 +1,4 @@
-from map_parser import Zone, Connection, Parser
+from map_parser import Zone, Connection
 import heapq
 
 
@@ -11,6 +11,8 @@ class Pathfinder:
                  end_hub: Zone):
         self.nb_drones = nb_drones
         self.zones = zones
+        self.start_hub = start_hub
+        self.end_hub = end_hub
         self.connections = connections
         self.costs = {}
         self.queue = []
@@ -21,5 +23,10 @@ class Pathfinder:
         heapq.heappush(self.queue, (0, self.start_hub.name))
 
         while self.queue:
-            costo, zona = heapq.heappop(self.queue)
-            
+            cost, zone = heapq.heappop(self.queue)
+            for element in self.connections.values():
+                if element.zone1 == zone or element.zone2 == zone:
+                    neighbor = (element.zone1
+                                if element.zone1 == zone else element.zone2)
+                zone_type = self.zones[neighbor].zone_type
+                total_cost = cost + (2 if zone_type == "restricted" else 1)
