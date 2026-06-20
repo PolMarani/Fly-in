@@ -1,4 +1,4 @@
-from map_parser import Zone, Connection
+from map_parser import Zone, Connection, Parser
 import heapq
 
 
@@ -16,6 +16,7 @@ class Pathfinder:
         self.connections = connections
         self.costs = {}
         self.queue = []
+        self.came_from = {element: None for element in self.zones}
 
     def find_path(self) -> list[Zone | Connection]:
         self.costs = {element: float("inf") for element in self.zones}
@@ -26,7 +27,22 @@ class Pathfinder:
             cost, zone = heapq.heappop(self.queue)
             for element in self.connections.values():
                 if element.zone1 == zone or element.zone2 == zone:
-                    neighbor = (element.zone1
-                                if element.zone1 == zone else element.zone2)
-                zone_type = self.zones[neighbor].zone_type
-                total_cost = cost + (2 if zone_type == "restricted" else 1)
+                    neighbor = (element.zone2
+                                if element.zone1 == zone else element.zone1)
+                    if self.zones[neighbor].zone_type == "blocked":
+                        continue
+                    zone_type = self.zones[neighbor].zone_type
+                    total_cost = cost + (2 if zone_type == "restricted" else 1)
+                    if total_cost < self.costs[neighbor]:
+                        self.costs[neighbor] = total_cost
+                        heapq.heappush(self.queue, (total_cost, neighbor))
+                        self.came_from[neighbor] = zone
+
+        return self.costs
+
+
+if __name__ == "__main__":
+    parser = Parser()
+    istanza = Pathfinder(parser.zones, parser.connections,
+                         parser.nb_drones, parser.start_hub, parser.end_hub)
+    print(istanza.find_path())
