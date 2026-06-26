@@ -17,6 +17,7 @@ class Pathfinder:
         self.costs = {}
         self.queue = []
         self.came_from = {element: None for element in self.zones}
+        self.occupied = {}
 
     def find_path(self) -> list[Zone | Connection]:
         self.costs = {element: float("inf") for element in self.zones}
@@ -40,9 +41,21 @@ class Pathfinder:
 
         return self.costs
 
+    def reconstruct_path(self, destination_zone: str) -> list:
+        current = destination_zone
+        path = []
+
+        while current is not None:
+            path.append(current)
+            current = self.came_from[current]
+
+        path.reverse()
+        return path
+
 
 if __name__ == "__main__":
     parser = Parser()
     istanza = Pathfinder(parser.zones, parser.connections,
                          parser.nb_drones, parser.start_hub, parser.end_hub)
     print(istanza.find_path())
+    print(istanza.reconstruct_path(istanza.end_hub.name))
