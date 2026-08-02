@@ -52,10 +52,30 @@ class Pathfinder:
         path.reverse()
         return path
 
+    def compute_turns(self, zone_list: list[str]) -> dict[str, int]:
+        drone_turn = {}
+        turn = 0
+
+        for zone in zone_list:
+            drone_turn[zone] = turn
+            if self.zones[zone].zone_type == "restricted":
+                turn += 2
+            else:
+                turn += 1
+
+        return drone_turn
+
+    def update_zone(self, zone_occupied: dict[]):
+        for element in self.occupied.items():
+            for in self.nb_drones:
+                if 
+            
 
 if __name__ == "__main__":
     parser = Parser()
     istanza = Pathfinder(parser.zones, parser.connections,
                          parser.nb_drones, parser.start_hub, parser.end_hub)
     print(istanza.find_path())
-    print(istanza.reconstruct_path(istanza.end_hub.name))
+    path = istanza.reconstruct_path(istanza.end_hub.name)
+    print(path)
+    print(istanza.compute_turns(path))

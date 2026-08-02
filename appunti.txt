@@ -1,0 +1,4 @@
+scrivere un metodo che, dato drone_turns (output di compute_turns),
+aggiorna self.occupied incrementando di 1 il contatore per ogni 
+coppia (zona, turno) che il drone attraversa.
+
