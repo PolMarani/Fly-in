@@ -18,6 +18,7 @@ class Pathfinder:
         self.queue = []
         self.came_from = {element: None for element in self.zones}
         self.occupied = {}
+        self.link_occupied = {}
 
     def find_path(self) -> list[Zone | Connection]:
         self.costs = {element: float("inf") for element in self.zones}
@@ -34,6 +35,10 @@ class Pathfinder:
                         continue
                     zone_type = self.zones[neighbor].zone_type
                     total_cost = cost + (2 if zone_type == "restricted" else 1)
+                    while self.link_occupied.get(((element.zone1, element.zone2), total_cost), 0) >= element.max_link_capacity:
+                        total_cost += 1
+                    while self.occupied.get((neighbor, total_cost), 0) >= self.zones[neighbor].max_drones:
+                        total_cost += 1
                     if total_cost < self.costs[neighbor]:
                         self.costs[neighbor] = total_cost
                         heapq.heappush(self.queue, (total_cost, neighbor))
@@ -65,11 +70,19 @@ class Pathfinder:
 
         return drone_turn
 
-    def update_zone(self, zone_occupied: dict[]):
-        for element in self.occupied.items():
-            for in self.nb_drones:
-                if 
-            
+    def update_zone(self, drone_turns: dict[str, int]):
+        for zone, turn in drone_turns.items():
+            if (zone, turn) in self.occupied:
+                self.occupied[(zone, turn)] += 1
+            else:
+                self.occupied[(zone, turn)] = 1
+
+    def update_link(self, zone_list: list[str], drone_turns: dict[str, int]):
+        for i in range(len(zone_list) - 1):
+            if ((zone_list[i], zone_list[i + 1]), drone_turns[zone_list[i+1]]) in self.link_occupied:
+                self.link_occupied[((zone_list[i], zone_list[i + 1]), drone_turns[zone_list[i+1]])] += 1
+            else:
+                self.link_occupied[((zone_list[i], zone_list[i + 1]), drone_turns[zone_list[i+1]])] = 1
 
 if __name__ == "__main__":
     parser = Parser()
@@ -78,4 +91,7 @@ if __name__ == "__main__":
     print(istanza.find_path())
     path = istanza.reconstruct_path(istanza.end_hub.name)
     print(path)
-    print(istanza.compute_turns(path))
+    path = istanza.compute_turns(path)
+    print(path)
+    istanza.update_zone(path)
+    print(istanza.occupied)
