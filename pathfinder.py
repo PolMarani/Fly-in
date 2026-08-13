@@ -18,9 +18,9 @@ class Pathfinder:
         self.queue = []
         self.came_from = {element: None for element in self.zones}
         self.occupied = {}
-        self.link_occupied = {}
+        self.link_occupied = {} 
 
-    def find_path(self) -> list[Zone | Connection]:
+    def find_path(self) -> None:
         self.costs = {element: float("inf") for element in self.zones}
         self.costs[self.start_hub.name] = 0
         heapq.heappush(self.queue, (0, self.start_hub.name))
@@ -35,16 +35,20 @@ class Pathfinder:
                         continue
                     zone_type = self.zones[neighbor].zone_type
                     total_cost = cost + (2 if zone_type == "restricted" else 1)
-                    while self.link_occupied.get(((element.zone1, element.zone2), total_cost), 0) >= element.max_link_capacity:
+                    while self.link_occupied.get(
+                        (tuple(
+                            sorted((
+                                element.zone1, element.zone2
+                                ))), total_cost), 0
+                                ) >= element.max_link_capacity:
                         total_cost += 1
-                    while self.occupied.get((neighbor, total_cost), 0) >= self.zones[neighbor].max_drones:
+                    while self.occupied.get((neighbor, total_cost), 0) >= (
+                            self.zones[neighbor].max_drones):
                         total_cost += 1
                     if total_cost < self.costs[neighbor]:
                         self.costs[neighbor] = total_cost
                         heapq.heappush(self.queue, (total_cost, neighbor))
                         self.came_from[neighbor] = zone
-
-        return self.costs
 
     def reconstruct_path(self, destination_zone: str) -> list:
         current = destination_zone
@@ -61,12 +65,13 @@ class Pathfinder:
         drone_turn = {}
         turn = 0
 
-        for zone in zone_list:
-            drone_turn[zone] = turn
-            if self.zones[zone].zone_type == "restricted":
-                turn += 2
-            else:
-                turn += 1
+        for i in range(len(zone_list)):
+            drone_turn[zone_list[i]] = turn
+            if i + 1 < len(zone_list):
+                if self.zones[zone_list[i+1]].zone_type == "restricted":
+                    turn += 2
+                else:
+                    turn += 1
 
         return drone_turn
 
@@ -79,19 +84,27 @@ class Pathfinder:
 
     def update_link(self, zone_list: list[str], drone_turns: dict[str, int]):
         for i in range(len(zone_list) - 1):
-            if ((zone_list[i], zone_list[i + 1]), drone_turns[zone_list[i+1]]) in self.link_occupied:
-                self.link_occupied[((zone_list[i], zone_list[i + 1]), drone_turns[zone_list[i+1]])] += 1
+            if (tuple(sorted((zone_list[i], zone_list[i + 1]))), drone_turns[zone_list[i+1]]) in self.link_occupied:
+                self.link_occupied[(tuple(sorted((zone_list[i], zone_list[i + 1]))), drone_turns[zone_list[i+1]])] += 1
             else:
-                self.link_occupied[((zone_list[i], zone_list[i + 1]), drone_turns[zone_list[i+1]])] = 1
+                self.link_occupied[(tuple(sorted((zone_list[i], zone_list[i + 1]))), drone_turns[zone_list[i+1]])] = 1
+
+    def run(self) -> dict:
+        all_drone_turns: dict[str, dict[str, int]] = {}
+
+        for drone in range(self.nb_drones):
+            self.find_path()
+            path = self.reconstruct_path(self.end_hub.name)
+            turns = self.compute_turns(path)
+            self.update_zone(turns)
+            self.update_link(path, turns)
+            all_drone_turns["D" + str(drone + 1)] = turns
+
+        return all_drone_turns
+
 
 if __name__ == "__main__":
     parser = Parser()
     istanza = Pathfinder(parser.zones, parser.connections,
                          parser.nb_drones, parser.start_hub, parser.end_hub)
-    print(istanza.find_path())
-    path = istanza.reconstruct_path(istanza.end_hub.name)
-    print(path)
-    path = istanza.compute_turns(path)
-    print(path)
-    istanza.update_zone(path)
-    print(istanza.occupied)
+    print(istanza.run())
