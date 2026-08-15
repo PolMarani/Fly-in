@@ -1,5 +1,6 @@
 from map_parser import Zone, Connection, Parser
 import heapq
+from simulator import Simulator
 
 
 class Pathfinder:
@@ -69,6 +70,7 @@ class Pathfinder:
             drone_turn[zone_list[i]] = turn
             if i + 1 < len(zone_list):
                 if self.zones[zone_list[i+1]].zone_type == "restricted":
+                    drone_turn[zone_list[i] + "-" + zone_list[i+1]] = turn + 1
                     turn += 2
                 else:
                     turn += 1
@@ -107,4 +109,6 @@ if __name__ == "__main__":
     parser = Parser()
     istanza = Pathfinder(parser.zones, parser.connections,
                          parser.nb_drones, parser.start_hub, parser.end_hub)
-    print(istanza.run())
+    drones_result = istanza.run()
+    simulator = Simulator(drones_result)
+    simulator.print_output()
