@@ -14,11 +14,11 @@ class Pathfinder:
         self.start_hub = start_hub
         self.end_hub = end_hub
         self.connections = connections
-        self.costs = {}
-        self.queue = []
+        self.costs: dict[str, int | float] = {}
+        self.queue: list[tuple[int, str]] = []
         self.came_from = {element: None for element in self.zones}
-        self.occupied = {}
-        self.link_occupied = {}
+        self.occupied: dict[tuple[str, int], int] = {}
+        self.link_occupied: dict[tuple[tuple[str, str], int], int] = {}
 
     def find_path(self) -> None:
         self.costs = {element: float("inf") for element in self.zones}

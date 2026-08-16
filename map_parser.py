@@ -26,11 +26,11 @@ class Parser:
     def __init__(self) -> None:
         zones_file = argv[1]
         self.nb_drones = 0
-        self.start_hub = Zone | None
-        self.end_hub = Zone | None
-        self.zones = {}
-        self.connections = {}
-        self.seen_connections = set()
+        self.start_hub: Zone | None = None
+        self.end_hub: Zone | None = None
+        self.zones: dict[str, Zone] = {}
+        self.connections: dict[str, Connection] = {}
+        self.seen_connections: set[tuple[str, str]] = set()
         self.read_zones(zones_file)
 
     def read_zones(self, zones_file: str) -> None:
@@ -88,11 +88,13 @@ class Parser:
                         elements = line.split(" ")
                         first_zone, second_zone = elements[1].split("-")
 
-                        if (tuple(sorted((first_zone, second_zone)))
-                                in self.seen_connections):
+                        sorted_zones = sorted((first_zone, second_zone))
+                        key = (sorted_zones[0], sorted_zones[1])
+
+                        if (key[0], key[1]) in self.seen_connections:
                             raise ValueError("Zone repetition, not valid mhmh")
-                        self.seen_connections.add(tuple(sorted((first_zone,
-                                                                second_zone))))
+                        self.seen_connections.add((key[0], key[1]))
+
                         if (first_zone not in self.zones or
                                 second_zone not in self.zones):
                             raise ValueError("Not valid connection")
@@ -124,8 +126,8 @@ class Parser:
                 raise ValueError("No end_hub definition in file")
 
     def metadati_extractor(self, metadati: dict, elements: list[str]) -> dict:
-        elements = " ".join(elements)
-        stripped_attr = elements.strip("[]")
+        joined_elements = " ".join(elements)
+        stripped_attr = joined_elements.strip("[]")
         splitted_attr = stripped_attr.split(" ")
 
         for element in splitted_attr:
