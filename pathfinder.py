@@ -1,6 +1,7 @@
 from map_parser import Zone, Connection, Parser
 import heapq
 from simulator import Simulator
+import sys
 
 
 class Pathfinder:
@@ -19,7 +20,7 @@ class Pathfinder:
         self.queue = []
         self.came_from = {element: None for element in self.zones}
         self.occupied = {}
-        self.link_occupied = {} 
+        self.link_occupied = {}
 
     def find_path(self) -> None:
         self.costs = {element: float("inf") for element in self.zones}
@@ -86,10 +87,16 @@ class Pathfinder:
 
     def update_link(self, zone_list: list[str], drone_turns: dict[str, int]):
         for i in range(len(zone_list) - 1):
-            if (tuple(sorted((zone_list[i], zone_list[i + 1]))), drone_turns[zone_list[i+1]]) in self.link_occupied:
-                self.link_occupied[(tuple(sorted((zone_list[i], zone_list[i + 1]))), drone_turns[zone_list[i+1]])] += 1
+            if (tuple(sorted((zone_list[i], zone_list[i + 1]))),
+                    drone_turns[zone_list[i+1]]) in self.link_occupied:
+                self.link_occupied[(tuple(
+                    sorted((
+                        zone_list[i], zone_list[i + 1]))),
+                        drone_turns[zone_list[i+1]])] += 1
             else:
-                self.link_occupied[(tuple(sorted((zone_list[i], zone_list[i + 1]))), drone_turns[zone_list[i+1]])] = 1
+                self.link_occupied[(tuple(
+                    sorted((zone_list[i], zone_list[i + 1]))),
+                    drone_turns[zone_list[i+1]])] = 1
 
     def run(self) -> dict:
         all_drone_turns: dict[str, dict[str, int]] = {}
@@ -106,7 +113,11 @@ class Pathfinder:
 
 
 if __name__ == "__main__":
-    parser = Parser()
+    try:
+        parser = Parser()
+    except ValueError as e:
+        print("Parsing error:", e)
+        sys.exit(1)
     istanza = Pathfinder(parser.zones, parser.connections,
                          parser.nb_drones, parser.start_hub, parser.end_hub)
     drones_result = istanza.run()
