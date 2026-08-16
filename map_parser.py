@@ -2,10 +2,10 @@ from sys import argv
 
 
 class Zone:
-    def __init__(self, name: str, x: int, y: int, 
+    def __init__(self, name: str, x: int, y: int,
                  zone_type: str = "normal",
                  max_drones: int = 1,
-                 color: str | None = None):
+                 color: str | None = None) -> None:
         self.name = name
         self.x = x
         self.y = y
@@ -23,17 +23,17 @@ class Connection:
 
 
 class Parser:
-    def __init__(self):
+    def __init__(self) -> None:
         zones_file = argv[1]
         self.nb_drones = 0
-        self.start_hub = {}
-        self.end_hub = {}
+        self.start_hub = Zone | None
+        self.end_hub = Zone | None
         self.zones = {}
         self.connections = {}
         self.seen_connections = set()
         self.read_zones(zones_file)
 
-    def read_zones(self, zones_file: str):
+    def read_zones(self, zones_file: str) -> None:
         with open(zones_file, "r") as file:
 
             for i, line in enumerate(file, start=1):
@@ -52,7 +52,7 @@ class Parser:
 
                     elif line.startswith(("start_hub", "end_hub", "hub")):
                         elements = line.split()
-                        metadati = {}
+                        metadati: dict[str, str] = {}
                         if len(elements) > 4:
                             metadati = self.metadati_extractor(
                                                         metadati, elements[4:])

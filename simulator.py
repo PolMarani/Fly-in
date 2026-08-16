@@ -10,7 +10,7 @@ RESET = "\033[0m"
 
 
 class Simulator:
-    def __init__(self, 
+    def __init__(self,
                  all_drone_turns: dict[str, dict[str, int]],
                  start_hub: Zone,
                  end_hub: Zone,
@@ -18,7 +18,7 @@ class Simulator:
         self.all_drone_turns = all_drone_turns
         self.start_hub = start_hub
         self.end_hub = end_hub
-        self.zones = zones 
+        self.zones = zones
 
     def print_output(self):
         turns = max(max(sotto_dict.values())
