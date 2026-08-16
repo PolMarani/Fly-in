@@ -2,7 +2,6 @@ from sys import argv
 
 
 class Zone:
-
     def __init__(self, name: str, x: int, y: int, 
                  zone_type: str = "normal",
                  max_drones: int = 1,
@@ -16,7 +15,6 @@ class Zone:
 
 
 class Connection:
-
     def __init__(self, zone1: str, zone2: str,
                  max_link_capacity: int = 1):
         self.zone1 = zone1
@@ -25,7 +23,6 @@ class Connection:
 
 
 class Parser:
-
     def __init__(self):
         zones_file = argv[1]
         self.nb_drones = 0

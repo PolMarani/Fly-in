@@ -1,4 +1,7 @@
-from .map_parser import Parser
+from map_parser import Parser
+from pathfinder import Pathfinder
+from simulator import Simulator
+import sys
 
 
 if __name__ == "__main__":
@@ -10,5 +13,7 @@ if __name__ == "__main__":
     istanza = Pathfinder(parser.zones, parser.connections,
                          parser.nb_drones, parser.start_hub, parser.end_hub)
     drones_result = istanza.run()
-    simulator = Simulator(drones_result)
+    simulator = Simulator(drones_result,
+                          istanza.start_hub, istanza.end_hub,
+                          istanza.zones)
     simulator.print_output()

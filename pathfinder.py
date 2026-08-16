@@ -1,7 +1,5 @@
-from map_parser import Zone, Connection, Parser
+from map_parser import Zone, Connection
 import heapq
-from simulator import Simulator
-import sys
 
 
 class Pathfinder:
@@ -110,16 +108,3 @@ class Pathfinder:
             all_drone_turns["D" + str(drone + 1)] = turns
 
         return all_drone_turns
-
-
-if __name__ == "__main__":
-    try:
-        parser = Parser()
-    except ValueError as e:
-        print("Parsing error:", e)
-        sys.exit(1)
-    istanza = Pathfinder(parser.zones, parser.connections,
-                         parser.nb_drones, parser.start_hub, parser.end_hub)
-    drones_result = istanza.run()
-    simulator = Simulator(drones_result)
-    simulator.print_output()
