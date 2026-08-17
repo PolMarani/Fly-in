@@ -219,5 +219,3 @@ Concretely, Claude helped with:
 - **Pointing out bugs through questions**, e.g. an inverted neighbor-lookup condition, a misplaced `self.` in an `__init__`, or a variable name mismatch between where a value was created and where it was checked
 - **Immediate correction of structural/undefined-behavior issues** when spotted (per the agreed exception for this category), e.g. flagging a `try/except` positioned so it silently swallowed valid rows, or a type annotation that assigned a type object instead of declaring one
 - **A full `mypy`/`flake8` cleanup pass**, explaining each reported error and its cause while Pol wrote every fix himself
-
-Three parts were explicitly excluded from the navigator/driver pact and written directly by Claude: **this README**, **docstrings**, and the **colored terminal visualization** in `simulator.py`.
