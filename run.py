@@ -10,6 +10,10 @@ if __name__ == "__main__":
     except ValueError as e:
         print("Parsing error:", e)
         sys.exit(1)
+
+    assert parser.start_hub is not None
+    assert parser.end_hub is not None
+
     istanza = Pathfinder(parser.zones, parser.connections,
                          parser.nb_drones, parser.start_hub, parser.end_hub)
     drones_result = istanza.run()

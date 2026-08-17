@@ -16,7 +16,8 @@ class Pathfinder:
         self.connections = connections
         self.costs: dict[str, int | float] = {}
         self.queue: list[tuple[int, str]] = []
-        self.came_from = {element: None for element in self.zones}
+        self.came_from: dict[str, str | None] = {element: None
+                                                 for element in self.zones}
         self.occupied: dict[tuple[str, int], int] = {}
         self.link_occupied: dict[tuple[tuple[str, str], int], int] = {}
 
@@ -35,12 +36,13 @@ class Pathfinder:
                         continue
                     zone_type = self.zones[neighbor].zone_type
                     total_cost = cost + (2 if zone_type == "restricted" else 1)
-                    while self.link_occupied.get(
-                        (tuple(
-                            sorted((
-                                element.zone1, element.zone2
-                                ))), total_cost), 0
-                                ) >= element.max_link_capacity:
+
+                    sorted_zones = sorted((element.zone1, element.zone2))
+                    zone_pair = (sorted_zones[0], sorted_zones[1])
+
+                    while (self.link_occupied.get(
+                        (zone_pair, total_cost), 0) >=
+                           element.max_link_capacity):
                         total_cost += 1
                     while self.occupied.get((neighbor, total_cost), 0) >= (
                             self.zones[neighbor].max_drones):
@@ -51,7 +53,7 @@ class Pathfinder:
                         self.came_from[neighbor] = zone
 
     def reconstruct_path(self, destination_zone: str) -> list:
-        current = destination_zone
+        current: str | None = destination_zone
         path = []
 
         while current is not None:
@@ -85,16 +87,15 @@ class Pathfinder:
 
     def update_link(self, zone_list: list[str], drone_turns: dict[str, int]):
         for i in range(len(zone_list) - 1):
-            if (tuple(sorted((zone_list[i], zone_list[i + 1]))),
-                    drone_turns[zone_list[i+1]]) in self.link_occupied:
-                self.link_occupied[(tuple(
-                    sorted((
-                        zone_list[i], zone_list[i + 1]))),
-                        drone_turns[zone_list[i+1]])] += 1
+            sorted_zones = sorted((zone_list[i], zone_list[i+1]))
+            zone_pair = (sorted_zones[0], sorted_zones[1])
+
+            if (zone_pair, drone_turns[zone_list[i+1]]) in self.link_occupied:
+                self.link_occupied[(zone_pair,
+                                    drone_turns[zone_list[i+1]])] += 1
             else:
-                self.link_occupied[(tuple(
-                    sorted((zone_list[i], zone_list[i + 1]))),
-                    drone_turns[zone_list[i+1]])] = 1
+                self.link_occupied[(zone_pair,
+                                    drone_turns[zone_list[i+1]])] = 1
 
     def run(self) -> dict:
         all_drone_turns: dict[str, dict[str, int]] = {}
