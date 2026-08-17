@@ -20,7 +20,7 @@ class Simulator:
         self.end_hub = end_hub
         self.zones = zones
 
-    def print_output(self):
+    def print_output(self) -> None:
         turns = max(max(sotto_dict.values())
                     for sotto_dict in self.all_drone_turns.values())
 
@@ -48,3 +48,4 @@ class Simulator:
 
         print()
         print("Simulation ended")
+        print(f" in {turns} turns")

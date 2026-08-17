@@ -65,27 +65,25 @@ class Pathfinder:
 
     def compute_turns(self, zone_list: list[str]) -> dict[str, int]:
         drone_turn = {}
-        turn = 0
 
         for i in range(len(zone_list)):
-            drone_turn[zone_list[i]] = turn
+            drone_turn[zone_list[i]] = int(self.costs[zone_list[i]])
             if i + 1 < len(zone_list):
                 if self.zones[zone_list[i+1]].zone_type == "restricted":
-                    drone_turn[zone_list[i] + "-" + zone_list[i+1]] = turn + 1
-                    turn += 2
-                else:
-                    turn += 1
+                    drone_turn[zone_list[i] + "-" + zone_list[i+1]] = (
+                        int(self.costs[zone_list[i+1]] - 1))
 
         return drone_turn
 
-    def update_zone(self, drone_turns: dict[str, int]):
+    def update_zone(self, drone_turns: dict[str, int]) -> None:
         for zone, turn in drone_turns.items():
             if (zone, turn) in self.occupied:
                 self.occupied[(zone, turn)] += 1
             else:
                 self.occupied[(zone, turn)] = 1
 
-    def update_link(self, zone_list: list[str], drone_turns: dict[str, int]):
+    def update_link(self, zone_list: list[str],
+                    drone_turns: dict[str, int]) -> None:
         for i in range(len(zone_list) - 1):
             sorted_zones = sorted((zone_list[i], zone_list[i+1]))
             zone_pair = (sorted_zones[0], sorted_zones[1])
